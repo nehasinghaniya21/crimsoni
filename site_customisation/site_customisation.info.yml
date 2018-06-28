@@ -1,0 +1,6 @@
+name: Site Customisation
+description: Custom module to achieve the Site API Key functionalities
+package: Custom
+
+type: module
+core: 8.x

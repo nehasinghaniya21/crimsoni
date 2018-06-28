@@ -1,0 +1,7 @@
+basic_page_json:
+ path: '/node/{node_id}/{site_api_key}'
+ defaults:
+   _title: 'Basic Page Json'
+   _controller: '\Drupal\site_customisation\Controller\BasicPageJson::returnJson'
+ requirements:
+   _permission: 'access content'

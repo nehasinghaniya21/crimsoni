@@ -1,0 +1,56 @@
+<?php
+/*
+ * @author: Neha Singhania
+ * @date: 27th June, 2018
+ */
+
+/*
+ * Implements hook_form_alter()
+ */
+function site_customisation_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+	if ($form_id == 'system_site_information_settings') {
+	  $get_site_api_key = \Drupal::config('site_customisation.settings')->get('site_api_key');
+
+		$form['site_information']['site_api_key'] = array(
+		  '#type' => 'textfield',
+		  '#description' => t('Store the Site API Key'),
+		  '#title' => t('Site API Key'),
+		  '#default_value' => isset($get_site_api_key) ? $get_site_api_key : '',
+		  '#size' => 60,
+		  '#maxlength' => 128,
+		  '#required' => TRUE,
+		);
+		foreach (array_keys($form['actions']) as $action) {
+	    if ($action != 'preview' && isset($form['actions'][$action]['#type']) && $form['actions'][$action]['#type'] === 'submit') {
+	      $form['actions'][$action]['#submit'][] = 'custom_site_api_key_form_submit';
+	    }
+	  }
+	  if (!empty($get_site_api_key)) {
+	  	if ( isset($form['actions']['submit']) ) {
+			  $form['actions']['submit']['#value'] = 'Update configuration';
+			}
+	  }
+	}
+}
+
+/**
+ * Implements custom submit handler for storing the Site API Key.
+ */
+function custom_site_api_key_form_submit(array $form, \Drupal\Core\Form\FormStateInterface $form_state){
+  $get_site_api_key = \Drupal::config('site_customisation.settings')->get('site_api_key');
+  $form_state_array = $form_state->getValues();
+  // Add the Site API Key if haven't exist in the database system
+  if (empty($get_site_api_key) && !empty($form_state_array['site_api_key'])) { 
+    \Drupal::configFactory()->getEditable('site_customisation.settings')
+    	->set('site_api_key', $form_state_array['site_api_key'])
+    	->save();
+    drupal_set_message("Site API Key added successfully.");
+  } 
+  // Update the Site API key if already saved previously
+  elseif ($get_site_api_key != $form_state_array['site_api_key']) {
+  	\Drupal::configFactory()->getEditable('site_customisation.settings')
+    	->set('site_api_key', $form_state_array['site_api_key'])
+    	->save();
+    drupal_set_message("Site API Key updated successfully.");
+  }
+}
